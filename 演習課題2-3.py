@@ -17,8 +17,14 @@ class vending_machine_UI():
     
     def __init__(self):
         self.root = tk.Tk()
-        self.product_list: list = None
-        self.display_now_cash: int = 0
+        self.product_list: list = []              # 商品のidを獲得する
+        self.display_now_cash: int = 0              # 投入合計金額
+        self.button_labels: list = ["","","","","","","","","","",
+                                "","","","","","","","","","",
+                                "","","","","","","","","","",
+                                "","","","","",""]                 # ボタンのlabelを登録する.(ここでは商品idを格納しておく)
+                                
+        self.user_cash_list = [0, 0, 0, 0, 0]       # どの硬貨がどれだけ投入されたかを保持
         self.root.title(u"自動販売機")
         self.root.geometry("800x800")
         self.canvas = tk.Canvas(self.root, width=500, height=800)
@@ -31,14 +37,13 @@ class vending_machine_UI():
         self.canvas.create_rectangle(30,80,410,380,fill='white')
         self.canvas.create_rectangle(220,430,270,480,fill='black')
         self.canvas.create_rectangle(300,400,360,450,fill='black')
+
         #ボタン上の温度と商品の配置
         for x in range(3):
             for y in range(12):
                     self.canvas.create_rectangle(45+y*30,155+x*100,62+y*30,163+x*100,fill='#0000ff')
                     self.canvas.create_rectangle(43+y*30,105+x*100,65+y*30,153+x*100,fill=self.color[y])
 
-        
-        
         self.canvas.create_arc(200,300,400,500,fill='black',start=270)
         self.ButtonA = tk.Button(relief="raised", bg="#1c1c1c",  activebackground="#2c2c2c")
         self.ButtonB = tk.Button(relief="raised", bg="#1c1c1c",  activebackground="#2c2c2c")
@@ -126,36 +131,74 @@ class vending_machine_UI():
         self.Button1000.place(x=500, y=340, height=50, width=200)
         self.root.mainloop()
 
-        self.set_product_from_db()
+# 購入ボタン反応チェックーーーーーーーーーーーーーーーー        
+        # self.push_cash_btn(10)
+        # self.push_cash_btn(10)
+        # self.push_cash_btn(10)
+        # self.push_cash_btn(50)
+        # self.push_cash_btn(100)
+        # self.push_cash_btn(100)
+        # self.push_cash_btn(100)
+        # self.push_cash_btn(500)
+        # self.push_cash_btn(1000)
+        # self.connection_with_db_cash()
+# 購入ボタン反応チェックーーーーーーーーーーーーーーーー
+
+        # 初期設定(DBから商品を引っ張ってくる)
+        self.set_product_from_db("product_tb")
 
     # データベースと接続して商品を配置する
-    def set_product_from_db(self) -> None:
+    def set_product_from_db(self, tb_name:str) -> None:
         my_db = VendingMachineDB()
-        self.product_list = my_db.show_table("SELECT * FROM `product_tb`;")
+        for product_key in my_db.show_table_all(tb_name):
+            self.product_list.append(product_key)
         del my_db
         # ここで取得した商品を自動販売機に対して割り振る動作も追加する
+        j = 0
+        for i in range(len(self.button_labels)):
+            self.button_labels[i] = self.product_list[j][0]
+            j = j + 1
+            if(j == len(self.product_list)):
+                j = 0
 
     # 押されたボタンに対して処理を実装
-    def push_product_btn(self, product_num: str) -> None:
+    def push_product_btn(self, label: int) -> None:
         pass
-
-    # dbとのやり取りを行う
+        # 押されたボタンの商品が何かを判定し、その金額を把握
+        # 投入された硬貨に対して
         
     # 投入金額に対して購入できる商品を表示する
+    def is_products_available_purchase(self) -> None:
+        pass
 
     # 投入金額の取得
-    def push_cash_btn(self, cash_price: int) -> list:
+    def push_cash_btn(self, cash_price: int) -> None:
         if(cash_price == 10):
-            pass
+            self.user_cash_list[0] = self.user_cash_list[0] + 1
         elif(cash_price == 10):
-            pass
+            self.user_cash_list[1] = self.user_cash_list[1] + 1
         elif(cash_price == 50):
-            pass
+            self.user_cash_list[2] = self.user_cash_list[2] + 1
         elif(cash_price == 500):
-            pass
+            self.user_cash_list[3] = self.user_cash_list[3] + 1
         elif(cash_price == 1000):
-            pass
+            self.user_cash_list[4] = self.user_cash_list[4] + 1
+        elif(cash_price == 0):
+            self.user_cash_list = [0, 0, 0, 0, 0]
+        # ここでお金が投入されるまいに購入可能商品のチェックをする
+        self.display_now_cash: int = self.user_cash_list[0] * 10 + self.user_cash_list[1] * 50 + self.user_cash_list[2] * 100 + self.user_cash_list[3] * 500 + self.user_cash_list[4] * 1000
 
+
+    def connection_with_db_cash(self) -> None:
+        my_db = VendingMachineDB()
+        # 複数の文のｓｑｌを実行するとエラるよ, まとめて書きましょう.
+        my_db.execute_the_query("""UPDATE `cash_tb` SET cash_num=cash_num-{} WHERE cash_price=10;
+                                    UPDATE `cash_tb` SET cash_num=cash_num-{} WHERE cash_price=50;
+                                    UPDATE `cash_tb` SET cash_num=cash_num-{} WHERE cash_price=100;
+                                    UPDATE `cash_tb` SET cash_num=cash_num-{} WHERE cash_price=500;
+                                    UPDATE `cash_tb` SET cash_num=cash_num-{} WHERE cash_price=1000;
+                                    """.format(self.user_cash_list[0], self.user_cash_list[1], self.user_cash_list[2], self.user_cash_list[3], self.user_cash_list[4]))
+        del my_db
 
 
 
@@ -165,7 +208,7 @@ class VendingMachineDB:
     def __init__(self) -> None:
         self.my_db = db.connect(host = "localhost", user = "root", password="", db = "vending_machine_db")
         self.my_db.ping(reconnect=True)
-        print("is connected?: {}\n".format(self.my_db.is_connected()))
+        print("is connected?: {}".format(self.my_db.is_connected()))
         self.cursor = self.my_db.cursor(buffered=True)
 
     # クエリ実行
@@ -189,6 +232,19 @@ class VendingMachineDB:
             return result
         except Exception as err:
             print(f"Error: {err}")
+    
+    def show_table_all(self, tb_name:str):
+        result: list = []
+        try:
+            self.cursor.execute("SELECT * FROM {};".format(tb_name))
+            data = self.cursor.fetchall()
+            if data != None:
+                for d in data:
+                    result.append(d)
+            print("show_table_all: {}".format(result))
+            return result
+        except Exception as err:
+            print(f"Error: {err}")
 
     # 削除時実行
     def __del__(self) -> None:
@@ -196,7 +252,7 @@ class VendingMachineDB:
         self.my_db.close()
         print("database was closed.\n")     
 
-        
+
 
 app = vending_machine_UI()
         
