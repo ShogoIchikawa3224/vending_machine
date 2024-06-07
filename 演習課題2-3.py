@@ -144,7 +144,7 @@ class vending_machine_UI():
     # 投入金額に対して購入できる商品を表示する
 
     # 投入金額の取得
-    def push_cash_btn(self, cash_price: int) -> None:
+    def push_cash_btn(self, cash_price: int) -> list:
         if(cash_price == 10):
             pass
         elif(cash_price == 10):
