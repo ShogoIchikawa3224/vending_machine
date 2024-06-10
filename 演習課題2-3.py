@@ -8,13 +8,11 @@ Created on Fri Jun  7 08:55:08 2024
 import sys
 import tkinter as tk
 import math
-#import mysql.connector as db
+import mysql.connector as db
 
 
 
-class vending_machine_UI():
-    
-    
+class Vending_Machine_UI():
     def __init__(self):
         self.root = tk.Tk()
         self.product_list: list = None
@@ -128,10 +126,14 @@ class vending_machine_UI():
 
 class VendingMachineDB:
     def __init__(self) -> None:
-        self.my_db = db.connect(host = "localhost", user = "root", password="", db = "vending_machine_db")
-        self.my_db.ping(reconnect=True)
-        print("is connected?: {}\n".format(self.my_db.is_connected()))
-        self.cursor = self.my_db.cursor(buffered=True)
+        self.my_db: object = None
+        self.my_db: object = None
+        self.my_db = db.connect(host = "localhost", user = "root", password="", db = "vending_machine_db") 
+        if self.my_db != None:
+            self.my_db.ping(reconnect=True)
+            print("is connected?: {}\n".format(self.my_db.is_connected()))
+        if self.my_db != None and self.my_db != None:
+            self.cursor = self.my_db.cursor(buffered=True)
 
     # クエリ実行
     def execute_the_query(self, query: str) -> None:
@@ -157,11 +159,14 @@ class VendingMachineDB:
 
     # 削除時実行
     def __del__(self) -> None:
-        self.cursor.close()
+        if self.cursor != None:
+            self.cursor.close()
         self.my_db.close()
         print("database was closed.\n")     
         
-app = vending_machine_UI()
+# app = Vending_Machine_UI()
+        
+app = VendingMachineDB()
         
         
         
