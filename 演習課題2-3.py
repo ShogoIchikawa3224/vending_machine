@@ -55,9 +55,6 @@ class vending_machine_UI():
         #self.Deposit_amount=tk.Label(text=self.display_now_cash)
         
         
-        
-        
-        
         #ボタンの生成        
         self.button_labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
                              "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -129,10 +126,6 @@ class vending_machine_UI():
             pass
 
 
-
-
-
-"""
 class VendingMachineDB:
     def __init__(self) -> None:
         self.my_db = db.connect(host = "localhost", user = "root", password="", db = "vending_machine_db")
@@ -167,9 +160,7 @@ class VendingMachineDB:
         self.cursor.close()
         self.my_db.close()
         print("database was closed.\n")     
-"""
         
-
 app = vending_machine_UI()
         
         
